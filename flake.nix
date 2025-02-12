@@ -20,9 +20,6 @@
             mermaid-cli
             kitty
           ];
-          shellHook = ''
-            presenterm --present ./main.md
-          '';
         };
       }
     );
