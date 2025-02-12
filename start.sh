@@ -1,5 +1,4 @@
 #!bin/bash
 
-presenterm -p ./main.md
-
+presenterm -p -x --config-file ./config.toml ./main.md
 

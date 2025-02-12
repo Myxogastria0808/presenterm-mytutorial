@@ -1,26 +1,52 @@
 {
-  description = "nodejs flake sample";
+  description = "dashi-server flake";
+
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    rust-overlay.url = "github:oxalica/rust-overlay";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs =
-    inputs:
-    inputs.flake-utils.lib.eachDefaultSystem (
+    {
+      nixpkgs,
+      rust-overlay,
+      flake-utils,
+      ...
+    }:
+    flake-utils.lib.eachDefaultSystem (
       system:
       let
-        pkgs = inputs.nixpkgs.legacyPackages.${system};
+        overlays = [ (import rust-overlay) ];
+        pkgs = import nixpkgs {
+          inherit system overlays;
+        };
       in
       {
-        devShells.default = pkgs.mkShell {
-          packages = with pkgs; [
-            #presenterm: https://mfontanini.github.io/presenterm/
-            presenterm
-            mermaid-cli
-            kitty
-          ];
-        };
+        devShells.default =
+          with pkgs;
+          mkShell {
+            buildInputs = [
+              # rust
+              openssl
+              pkg-config
+              rust-bin.beta.latest.default
+              # R
+              R
+              # java
+              temurin-bin
+              # javascript
+              nodejs
+              corepack
+              # python
+              python311
+              # presenterm dependencies
+              presenterm
+              mermaid-cli
+              kitty
+            ];
+            RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
+          };
       }
     );
 }
